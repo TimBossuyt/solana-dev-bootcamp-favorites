@@ -52,6 +52,91 @@ describe("favorites", () => {
     assert.deepEqual(data.hobbies, favoriteHobbies);
   })
 
-  
+  it("Update favorites information", async () =>  {
+    const newFavoriteHobbies = ['basketball', '3D-printing', 'UAS', 'Solana'];
+    try {
+      const tx = await program.methods.setFavorites(
+        favoriteNumber,
+        favoriteColor,
+        newFavoriteHobbies
+      )
+      .signers([user])
+      .rpc();
+    } catch (error) {
+      console.error((error as Error).message);
+      throw new Error((error as Error).message)
+    }
+  })
+
+  it("Reject setting favorites for unauthorized signers", async () => {
+    try {
+      await program.methods
+        .setFavorites(favoriteNumber, favoriteColor, favoriteHobbies)
+        // Try to set account information of the user using another signer (random guy)
+        .accounts({
+          user: user.publicKey
+        })
+        .signers([someRandomGuy])
+        .rpc();
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      assert.isTrue(errorMessage.includes('unknown signer'));
+    }
+  })
+
+  it("Let random guy set his favorites", async () => {
+    // First give the random guy some solana
+    const latestBlockhash = await provider.connection.getLatestBlockhash();
+    const airdropSignature = await provider.connection.requestAirdrop(
+      someRandomGuy.publicKey,
+      anchor.web3.LAMPORTS_PER_SOL // 1 SOL
+    );
+    await provider.connection.confirmTransaction({
+      signature: airdropSignature,
+      blockhash: latestBlockhash.blockhash,
+      lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
+    });
+
+    try {
+      const tx = await program.methods.setFavorites(
+        favoriteNumber,
+        "blue",
+        ["being random"]
+      )
+      .accounts(
+        {
+          user: someRandomGuy.publicKey
+        }
+      )
+      .signers([someRandomGuy])
+      .rpc();
+    } catch (error) {
+      throw new Error((error as Error).message)
+    }
+    
+
+    // Retrieve the associated PDA --> [pubkey, bump-seed] --> at index 0 of return value
+    const favorites_pda_key = anchor.web3.PublicKey
+    .findProgramAddressSync(
+      [Buffer.from('favorites'), someRandomGuy.publicKey.toBuffer()], 
+      program.programId)[0];
+
+    const data = await program.account.favorites.fetch(favorites_pda_key);
+
+    // And make sure it matches!
+    assert.equal(data.color, "blue");
+    assert.equal(data.number.toString(), favoriteNumber.toString());
+    assert.deepEqual(data.hobbies, ["being random"]);
+  })
+
+  it("Let user want to read it's hobbies", async () => {
+    try {
+      const tx = await program.methods.getFavorites()
+      .signers([user])
+      .rpc();
+    } catch (error) {
+      throw new Error((error as Error).message)
+    }
+  })
 
 });

@@ -38,6 +38,26 @@ pub mod favorites {
             Ok(())
 
         }
+    
+    pub fn get_favorites(ctx: Context<GetFavorites>) -> Result<()> {
+        let user_pubkey = ctx.accounts.user.key();
+        msg!(
+            "User {} wants to check what his hobbies are",
+            user_pubkey
+        );
+
+        // Retrieve the user's Favorites
+        let favorites = &ctx.accounts.favorites;
+
+        msg!(
+            "User's favorite number is {}, favorite color is {}, hobbies are {:?}",
+            favorites.number,
+            favorites.color,
+            favorites.hobbies
+        );
+
+        return Ok(())
+    }
 
     
 }
@@ -74,4 +94,16 @@ pub struct SetFavorites<'info> {
     pub favorites: Account<'info, Favorites>,
 
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct GetFavorites<'info> {
+    #[account()]
+    pub user: Signer<'info>,
+
+    #[account(
+        seeds=[b"favorites", user.key().as_ref()],
+        bump
+    )]
+    pub favorites: Account<'info, Favorites>,
 }
