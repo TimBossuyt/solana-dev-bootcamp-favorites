@@ -47,7 +47,7 @@ anchor deploy
 ## 🚀 Deployed Program IDs
 | Network  | Program ID |
 |:---------|:-----------|
-| Devnet   | `HhQUdUs3NXAgUu8oB3B2SGQ31PYkJrgN8m4v5Af1rX58` |
+| Devnet   | [HhQUdUs3NXAgUu8oB3B2SGQ31PYkJrgN8m4v5Af1rX58](https://explorer.solana.com/address/HhQUdUs3NXAgUu8oB3B2SGQ31PYkJrgN8m4v5Af1rX58?cluster=devnet) |
 
 
 
