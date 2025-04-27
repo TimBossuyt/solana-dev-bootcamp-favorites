@@ -14,8 +14,8 @@ describe("favorites", () => {
 
   // Here's what we want to write to the blockchain
   const favoriteNumber = new anchor.BN(6);
-  const favoriteColor = 'purple';
-  const favoriteHobbies = ['skiing', 'skydiving', 'biking'];
+  const favoriteColor = 'red';
+  const favoriteHobbies = ['basketball', '3D-printing', 'UAS'];
 
   before(async () => {
     const balance = await provider.connection.getBalance(user.publicKey);
@@ -51,5 +51,7 @@ describe("favorites", () => {
     assert.equal(data.number.toString(), favoriteNumber.toString());
     assert.deepEqual(data.hobbies, favoriteHobbies);
   })
+
+  
 
 });
